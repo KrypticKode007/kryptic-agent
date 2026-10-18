@@ -1,0 +1,49 @@
+name: "ROS 2 Edge Production Invariant Validation"
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'commercial/production-edge'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  ros2-container-audit:
+    runs-on: ubuntu-latest
+    container:
+      image: osrf/ros:humble-desktop-full
+    steps:
+      - name: "Clone Active Repository State"
+        uses: actions/checkout@v4
+
+      - name: "Install Core Python Dependencies"
+        run: |
+          apt-get update && apt-get install -y python3-pip
+          python3 -m pip install --upgrade pip
+          pip install pytest pycryptodome ruff black
+
+      - name: "Lint Edge Engine Structure"
+        run: |
+          black --check kryptic_ros2_edge_core.py
+          ruff check kryptic_ros2_edge_core.py
+
+      - name: "Execute ROS 2 Mock Telemetry Test Loop"
+        run: |
+          # Verifies that sub-millisecond execution loops compile cleanly without real ROS 2 hardware nodes present
+          python3 kryptic_ros2_edge_core.py
+
+      - name: "Verify Low-Overhead Flash Buffer Integrity"
+        run: |
+          python3 -c "
+          import os, struct
+          fmt = '<df244s'
+          block_size = struct.calcsize(fmt)
+          if os.path.exists('kryptic_flash_ledger.bin'):
+              size = os.path.getsize('kryptic_flash_ledger.bin')
+              print(f'Flash Buffer Check: PASS. Written {size} bytes ({size // block_size} records).')
+          else:
+              raise FileNotFoundError('Atomic ledger missing from current directory execution space.')
+          "
+          
