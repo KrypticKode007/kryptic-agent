@@ -1,0 +1,20 @@
+[ HARDWARE / TELEMETRY RUNTIME LAYER ]
+       ├── /drone/battery ──► (BatteryState) ──┐
+       └── /drone/imu     ──► (Imu)          ──┤
+                                               │
+                                               ▼ (<1ms Latency Channel)
+       [ KRYPTIC EDGE EXECUTIVE ENGINE: IM-FIN NODE ]
+       ├── Invariant Checks: 0.0 <= stamina <= 50.0
+       ├── Dynamic State Evaluation Variables
+       │     ├── Valence (Operational Equilibrium)
+       │     └── Arousal (Processing Intensity Tracking)
+       │
+       ├───► [ CRITICAL FAULT DETECTED ] ──────► /hardware/failsafe_trigger
+       │                                            (Forces Autonomous Landing)
+       │
+       └───► [ NOMINAL CYCLIC STEP STATE ]
+               │
+               ▼ (Atomic Binary Struct Packing)
+       [ UN-CORRUPTIBLE FLASH PERSISTENCE BLOCK ]
+       └── Written to: kryptic_flash_ledger.bin
+             (Bypasses standard file descriptors to survive violent drops)
