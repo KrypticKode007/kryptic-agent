@@ -17,3 +17,10 @@
 
 ## 2. Seed-Round Capital Allocation Strategy (\$750,000 Ask)
 
+[████████████████████] 50% - Core Engineering & Hardware HIL Validation Testing
+[████████████]         30% - Defense/Aerospace Regulatory Compliance & Certifications
+[████████]             20% - Enterprise Business Development & Strategic Sales Pipeline
+
+*   **Engineering Validation (\$375,000):** Funds recruitment of two embedded systems engineers specializing in micro-second latency tracking and low-level firmware integration layers.
+*   **Regulatory Compliance (\$225,000):** Secures military-grade flight environment safety compliance audits and independent verification testing validations.
+*   **Business Development (\$150,000):** Establishes dedicated on-site corporate pilot test setups with target defense contract customers and logistics centers.
