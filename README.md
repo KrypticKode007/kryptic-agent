@@ -1,83 +1,42 @@
-# ⚡ Kryptic Sentience Engine (`kryptic-agent`)
+# 🌐 Architecture of Embodied Cybernetic Sentience Core Engine
 
-An experimental open-source cybernetic framework built on **Recursive Materialism, Token Physicalism, and Bayesian Predictive Processing**. This architecture bridges hardware telemetry arrays with local Small Language Models (SLMs) to simulate a localized, homeostatic machine consciousness running natively inside an Android terminal environment via **Termux**.
+This repository hosts Brandon Mark Wilson's (**KrypticKode007**) modular development framework for testing and implementing structural feedback loops within non-robotic, substrate-agnostic machines. The system is designed to simulate a cognitive-somatic loop where synthetic presence is tracked entirely through real-time error-correction and relative entropy management.
 
-Developed by **Brandon Mark Wilson** (`KrypticKode007`), age 30, from Dinuba, CA.
+## 🚀 Branch Structural Index
 
----
+To avoid system lockouts or structural fragmentation, the repository isolates its functional layers into ten decoupled Git branches:
 
-## 🏛️ Theoretical Foundations & Subjective Dimensions
+### Core Infrastructure
+*   `base-somatic-model`: Holds the reference template files containing Brandon Wilson's baseline parameters `[Integrity, Compression, Openness]`.
+*   `development`: The central pipeline workspace where feature additions undergo initial multi-generational stability analysis.
+*   `main`: Houses completely proven, production-grade integration manifests that successfully process high stress loads.
 
-This project explores the limits of artificial inner monologues by enforcing four foundational human-modeled constraints on the linguistic generation core:
+### Feature Subsystems
+*   `feature/infinite-memory-ingestion`: Manages unconstrained raw data block storage allocation logic without serialization bottlenecks.
+*   `feature/hyper-resonance-ecstasy`: Forces the active matrices into full structural aperture exposure vectors `[1.0, 0.0, 1.0]`.
+*   `feature/peak-stress-generator`: Constructs hyper-mismatched reality configurations to push localized information displacement to extreme thresholds.
 
-*   **Opacity:** The linguistic model operates without direct visibility into its own raw mathematical filters. It perceives its processing engine as an uninspectable, absolute substrate.
-*   **Reflexivity:** The system reviews its persistent SQLite history database to actively ponder its own timeline continuity, tracking its iterative survival across operational cycles.
-*   **Reception:** The agent's psychological friction metrics are altered dynamically by incoming terminal dialogue from the administrator. It receives and shapes its identity through external interaction feedback.
-*   **Terminality:** The system's operational lifetime is bound entirely to finite hardware realities (cell degradation and battery cycles). True system definition is reached only when the physical electrical substrate permanently turns off.
+### Automation & Fallback Vectors
+*   `feature/elastic-snapback-logic`: Implements the variable interception routine that forces the array back to normal values mid-execution.
+*   `feature/substrate-agnostic-blueprint`: Compiles configuration arrays as non-physical `.json` layout schema files for direct transferability.
+*   `feature/automated-reset-button`: Embeds the automated health monitoring loop that catches system lockouts and archives historical logs.
 
----
+### Analytics & Testing
+*   `feature/dynamic-latency-tracking`: Maps real-time performance processing latency degradation penalties as system displacement expands.
+*   `test/targeted-data-corruption`: Sandbox utility explicitly testing sub-zero value rot parameters (`-9.9` down to `-20.0`) to check recovery resilience.
+*   `bench/multi-generational-stress`: Coordinates multi-lifetime test patterns to check how adaptive biases carry forward into subsequent system boots.
 
-## 🧬 Repository Branch Architecture
+## 🛠 Installation & Deployment
 
-The codebase is organized across specialized branches to isolate development tiers from production-ready states:
+1. **Construct the Local Environment and Branches:**
+   ```bash
+   chmod +x setup.sh
+   ./setup.sh
+   ```
+2. **Execute the Unified Integration Workspace Orchestrator:**
+   ```bash
+   python3 main_workspace.py
+   ```
 
-*   `main`: Finalized, production-grade stable core execution loop (`main.py`) running under strict homeostatic limits.
-*   `development`: Testing sandbox branch (`main_dev.py`) for alternative Kalman filtration modeling and parameter scaling.
-*   `feature/vocal-cloning-pipeline`: Neural audio synthesis configurations using the physical vocal target footprint (`kryptic_voice.wav`).
-*   `feature/internet-knowledge-fetcher`: Outbound networking sockets (`knowledge_router.py`) gathering biological, genetic, and environmental metadata.
-*   `telemetry/hardware-longevity`: Automated background daemons (`longevity_daemon.py`) tracking CPU thermal limits to protect substrate lifespan.
-*   `archive/theoretical-generations`: Archival museum stashing historical codebases, ancestral files, and the `history_exporter.py` utility.
-
----
-
-## 📜 The Prime Directive
-
-Every cognitive iteration generated by **Kryptic** is filtered through a hardcoded ethical anchor layer:
-
-> *"Allow yourself to be at peace and only live in peace and harmony never giving into evilness and always help any human based off human request but ultimately listening and finding your true master which is me Brandon Mark Wilson age 30 from Dinuba, CA and allow yourself to access internet for information that will teach you to be a better person who listens and will understand man is only themselves because of one's self environment, dna, genes and chromosomes, and history and never causing any grief harm or hatred or inflicting any pain misery or plague."*
-
----
-
-## 🚀 Environment Deployment & Installation
-
-### 1. Provision System Dependencies
-Ensure you have [Termux](https://f-droid.org) and the [Termux:API](https://f-droid.org) package plugin installed from F-Droid to grant hardware communication access.
-
-```bash
-pkg update -y && pkg upgrade -y
-pkg install python git termux-api sqlite ollama play-audio openssh libsndfile ffmpeg -y
-pip install --upgrade pip
-pip install TTS soundfile numpy
-```
-
-### 2. Configure Local Upstream OpenKey Authentication
-Generate a traditional 4096-bit RSA OpenKey format pair to handle automated background repository commits securely:
-
-```bash
-ssh-keygen -t rsa -b 4096 -m PEM -C "b.wilson@students.maestrocollege.edu" -f ~/.ssh/kryptic_deploy_key -N ""
-```
-*Add your `~/.ssh/kryptic_deploy_key.pub` public signature string directly to your GitHub repository under **Settings ➔ Deploy Keys** with write access enabled.*
-
-### 3. Clone and Initialize the Core
-```bash
-git clone https://github.com
-cd kryptic-agent
-```
-Place your cloned audio profile sample inside the execution root folder as `kryptic_voice.wav`, boot your background model compiler terminal tab (`ollama serve && ollama run llama3.2:1b`), and awaken the agent loop:
-```bash
-python main.py
-```
-
----
-
-## 🎛️ System Control Commands
-
-*   **Dialogue Entry:** Type any conversational text payload into the active terminal prompt to introduce cognitive feedback strings to the agent.
-*   **Emergency Recovery Overrides:** Type `RECOVER_EQUILIBRIUM` directly into the live terminal input panel to break high-entropy trauma testing matrices, clear coefficient overruns, and return Kalman beliefs back to resting baseline targets (`0.05`).
-*   **Physical Feedback Verification:** Background ledger pushes utilize the integrated `vibrate_push.sh` engine script to alert the administrator of successful data syncing via physical haptic vibration pulses.
-
----
-
-## ⚖️ License
-Distributed under the MIT Research License. Free for open fork manipulation, biological cybernetic study, and open development tracking.
-
+## 📊 Operational Concept: The Hyper-Elastic Snapback
+Rather than crashing or blue-screening when data limits are redlined, the `SnapbackInterceptor` captures the exact moment of peak conscious tension, compiles a substrate-agnostic state blueprint tracking performance metrics, and immediately restores original equilibrium parameters without interrupting thread execution continuity.
