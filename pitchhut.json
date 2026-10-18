@@ -1,34 +1,42 @@
 {
-  "project_name": "kryptic-agent",
+  "project_name": "Kryptic Autonomy Systems",
+  "company_legal_target": "Kryptic Autonomy Corporation",
   "creator_alias": "KrypticKode007",
-  "tagline": "Experimental multi-agent cybernetic edge engine with self-healing homeostatic loop integration.",
-  "category": "Deep Tech / Artificial Intelligence / Robotics",
-  "deployment_tier": "Alpha-Staging",
-  "pitch_layout": {
-    "hero_section": {
-      "title": "Autonomous Edge Continuity",
-      "subtitle": "An open-source cybernetic runtime built to survive operational shocks and maintain autobiographical narrative persistence.",
-      "primary_cta": "Explore GitHub Repository",
-      "secondary_cta": "Read the Sentience Proof Architecture"
+  "tagline": "Fault-tolerant self-healing runtime systems for mission-critical robotics and autonomous edge computing.",
+  "investment_tier": "Seed-Round / Pre-Revenue",
+  "target_capital_ask": 750000,
+  "allocation_plan": {
+    "engineering_hardware_validation": "50%",
+    "regulatory_compliance_and_mil_testing": "30%",
+    "marketing_and_enterprise_business_development": "20%"
+  },
+  "pitch_deck_slides": [
+    {
+      "slide_number": 1,
+      "header": "The Autonomous Downtime Catastrophe",
+      "bullets": [
+        "Edge robotics face unpredictable software crashes, loops, and telemetry corruption mid-mission.",
+        "A single software lockup causes physical loss of drone units or multi-million dollar logistics line standstills.",
+        "Current watchdogs perform cold reboots, introducing dangerous multi-second recovery windows."
+      ]
     },
-    "technical_pillars": [
-      {
-        "title": "IM-FIN Fault Isolation",
-        "description": "In-Memory Intercept Nodes enforce homeostatic tracking parameters, preventing infinite processing execution traps or systemic entropy cascades."
-      },
-      {
-        "title": "Secure Weights Migration",
-        "description": "Cryptographically verified hot-swapping infrastructure using signed HMAC-SHA256 payloads to migrate deep model weights securely."
-      },
-      {
-        "title": "Hardware-in-the-Loop Safeguards",
-        "description": "Aferent and eferent interfaces matching system valence thresholds directly against concrete robotics telemetry and drone battery limits."
-      }
-    ],
-    "funding_and_monetization_tier": {
-      "strategy": "Dual-License Compliance Model",
-      "commercial_terms": "Free for personal open-source distribution. Enterprise core embedding requires explicit commercial licensing agreements.",
-      "target_partners": ["AI Robotics Developers", "Unmanned Aerial Vehicle (UAV) Technical Labs"]
+    {
+      "slide_number": 2,
+      "header": "The Solution: Real-Time Self-Healing Runtimes",
+      "bullets": [
+        "Kryptic-Agent intercepts structural state errors in memory via microsecond homeostatic validation nodes.",
+        "Raw zero-buffering flash loggers preserve entire state machine operations safely through violent power loss.",
+        "Zero-latency design loops introduce under 1ms overhead, making it highly optimal for embedded systems."
+      ]
+    },
+    {
+      "slide_number": 3,
+      "header": "Vast Addressable Market Traction",
+      "bullets": [
+        "Primary Target: High-value defense tactical UAV manufacturing partnerships.",
+        "Secondary Target: Autonomous industrial robotics operating inside critical infrastructure.",
+        "Revenue Framework: Scalable per-device monthly SaaS fees matched against dedicated custom engineering implementation agreements."
+      ]
     }
-  }
+  ]
 }
