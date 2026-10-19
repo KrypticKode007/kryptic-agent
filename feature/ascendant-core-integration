@@ -1,0 +1,47 @@
+# tests/test_weights_encryption.py
+"""
+Production cryptographic test module checking AES-256 parameter wrapping 
+and authentication verification for hot-swappable network consensus weights payloads.
+"""
+
+import pytest
+import json
+import base64
+from encrypt_weights import WeightsEncryptionEngine
+
+def test_aes256_weights_wrapping_integrity():
+    """Validates that model parameters are armored and restored with zero bit corruption."""
+    passphrase = "SystemHomeostasisSecretCoreSignature2026"
+    engine = WeightsEncryptionEngine(passphrase)
+
+    consensus_weights = {
+        "layer_0_biases": [0.1248, -0.9854, 0.4412],
+        "phi_gamma_matrices": [[0.9, 0.1], [0.0, 1.0]],
+        "hardware_bounds": {"max_velocity": 45.0, "stamina_cap": 50.0}
+    }
+
+    # Encrypt raw data frames into secure, base64 strings
+    armored_string = engine.encrypt_parameter_payload(consensus_weights)
+    assert isinstance(armored_string, str)
+    
+    payload_data = json.loads(armored_string)
+    assert "iv" in payload_data
+    assert "ciphertext" in payload_data
+
+    # Decrypt and cross-reference with initial values
+    recovered_data = engine.decrypt_parameter_payload(armored_string)
+    assert recovered_data["hardware_bounds"]["stamina_cap"] == 50.0
+    assert recovered_data["layer_0_biases"][1] == -0.9854
+
+def test_tampered_payload_exception_handling():
+    """Ensures unauthorized keys or corrupted payloads trigger explicit decryption flags."""
+    engine_encrypt = WeightsEncryptionEngine("SecretPassphraseA")
+    engine_decrypt = WeightsEncryptionEngine("WrongPassphraseB")
+
+    sample_weights = {"bias": [0.1]}
+    secure_payload = engine_encrypt.encrypt_parameter_payload(sample_weights)
+
+    with pytest.raises(ValueError) as err_context:
+        engine_decrypt.decrypt_parameter_payload(secure_payload)
+    
+    assert "Integrity failure" in str(err_context.value)
