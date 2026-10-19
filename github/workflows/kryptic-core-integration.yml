@@ -1,0 +1,46 @@
+# .github/workflows/kryptic-core-integration.yml
+name: "Kryptic Core Integration & Ego Boundary Audit"
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'feature/ascendant-core-integration'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  run-integration-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout Codebase"
+        uses: actions/checkout@v4
+
+      - name: "Set up Python Environment"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: "Install Verification Dependencies"
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest ruff black requests pycryptodome
+
+      - name: "Audit Structural Syntax Blocks"
+        run: |
+          black --check ego_boundary_calculator.py tests/test_ego_boundary.py
+          ruff check ego_boundary_calculator.py tests/test_ego_boundary.py
+
+      - name: "Execute Main Integration Shell Pipeline"
+        run: |
+          # Simulates basic startup loops and validates deployment logic paths
+          chmod +x kryptic_main_shell.sh
+          ./kryptic_main_shell.sh
+
+      - name: "Run Ego Boundary Mathematical Unit Tests"
+        run: |
+          # Confirms Bayesian prediction equations execute accurately under extreme limits
+          pytest tests/test_ego_boundary.py -v
+          
