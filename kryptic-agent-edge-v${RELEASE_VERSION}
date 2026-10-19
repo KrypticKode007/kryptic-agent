@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# build_release_package.sh
+# Automated release routine to bundle compiled binaries, config manifests, 
+# and deployment files into a compressed, downloadable production release package.
+
+set -euo pipefail
+
+RELEASE_VERSION="1.0.0"
+PACKAGE_NAME="kryptic-agent-edge-v${RELEASE_VERSION}"
+DIST_DIR="dist/${PACKAGE_NAME}"
+
+echo "======================================================================"
+echo "📦 BUILDING KRYPTIC-AGENT DOWNLOADABLE PRODUCTION RELEASE PACKAGE"
+echo "======================================================================"
+
+# 1. Clean and build release directory hierarchy
+rm -rf dist/
+mkdir -p "${DIST_DIR}/bin"
+mkdir -p "${DIST_DIR}/config"
+mkdir -p "${DIST_DIR}/docs"
+
+# 2. Compile C++ Bare-Metal Latency Target Binary
+echo "[*] Compiling production flight computer execution binaries..."
+if command -v g++ &> /dev/null; then
+    g++ -std=c++17 -O3 test_hardware_latency.cpp -o "${DIST_DIR}/bin/test_hardware_latency_bin"
+    echo "  -> Compiled: bin/test_hardware_latency_bin"
+else
+    echo "  ⚠️ g++ compiler not found. Skipping physical binary compilation step."
+fi
+
+# 3. Stage Runtime Scripts, Configurations, and Metadata Layouts
+echo "[*] Staging application modules, license matrices, and manifests..."
+cp kryptic_ros2_edge_core.py "${DIST_DIR}/bin/"
+cp unified_conscious_agent.py "${DIST_DIR}/bin/"
+cp pitchhut.json "${DIST_DIR}/config/"
+cp LICENSE "${DIST_DIR}/"
+cp README.md "${DIST_DIR}/docs/"
+cp ENTERPRISE_PRICING.md "${DIST_DIR}/docs/"
+
+# 4. Generate Compressed Archive Package
+echo "[*] Compiling archive tarball release..."
+cd dist
+tar -czf "${PACKAGE_NAME}.tar.gz" "${PACKAGE_NAME}/"
+cd ..
+
+echo "======================================================================"
+echo "✅ RELEASE BUNDLE SUCCESS: dist/${PACKAGE_NAME}.tar.gz"
+echo "======================================================================"
