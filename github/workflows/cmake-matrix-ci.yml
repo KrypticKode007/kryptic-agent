@@ -1,0 +1,40 @@
+name: "C++ CMake Bare-Metal Matrix Compilation"
+
+on:
+  push:
+    branches: [ 'main', 'feature/ascendant-core-integration' ]
+  pull_request:
+    branches: [ 'main' ]
+
+jobs:
+  build-and-test-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [ {cc: gcc, cxx: g++}, {cc: clang, cxx: clang++} ]
+
+    steps:
+      - name: "Checkout Codebase"
+        uses: actions/checkout@v4
+
+      - name: "Install Build System Dependencies"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential clang
+
+      - name: "Configure Project via CMake Matrix"
+        env:
+          CC: ${{ matrix.compiler.cc }}
+          CXX: ${{ matrix.compiler.cxx }}
+        run: |
+          cmake -B build -S . \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: "Compile Bare-Metal Hardware Target Binary"
+        run: |
+          cmake --build build --config Release
+
+      - name: "Execute High-Precision Latency Benchmark"
+        run: |
+          cd build && ctest --output-on-failure
+          
