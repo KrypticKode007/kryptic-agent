@@ -1,42 +1,30 @@
 {
-  "project_name": "Kryptic Autonomy Systems",
-  "company_legal_target": "Kryptic Autonomy Corporation",
-  "creator_alias": "KrypticKode007",
-  "tagline": "Fault-tolerant self-healing runtime systems for mission-critical robotics and autonomous edge computing.",
-  "investment_tier": "Seed-Round / Pre-Revenue",
-  "target_capital_ask": 750000,
-  "allocation_plan": {
-    "engineering_hardware_validation": "50%",
-    "regulatory_compliance_and_mil_testing": "30%",
-    "marketing_and_enterprise_business_development": "20%"
-  },
-  "pitch_deck_slides": [
-    {
-      "slide_number": 1,
-      "header": "The Autonomous Downtime Catastrophe",
-      "bullets": [
-        "Edge robotics face unpredictable software crashes, loops, and telemetry corruption mid-mission.",
-        "A single software lockup causes physical loss of drone units or multi-million dollar logistics line standstills.",
-        "Current watchdogs perform cold reboots, introducing dangerous multi-second recovery windows."
-      ]
+  "pitchhut_layout_parameters": {
+    "theme_color": "#00FF66",
+    "font_family": "JetBrains Mono, monospace",
+    "enable_live_telemetry_widget": true,
+    "dashboard_refresh_rate_ms": 500,
+    "sections": {
+      "hero": {
+        "alignment": "center",
+        "display_github_stars": true,
+        "primary_button_link": "https://github.com",
+        "secondary_button_link": "mailto:Mark.BrandonWilson@gmail.com"
+      },
+      "technical_deep_dive": {
+        "render_mode": "interactive_tabs",
+        "tabs": ["IM-FIN Node", "SWMP Encryption", "Flash Ring-Buffer", "ROS 2 Telemetry"]
+      },
+      "financial_projections": {
+        "chart_type": "stacked_bar_revenue",
+        "metrics_source": "docs/financials/FINANCIAL_MODEL.md",
+        "currency": "USD"
+      }
     },
-    {
-      "slide_number": 2,
-      "header": "The Solution: Real-Time Self-Healing Runtimes",
-      "bullets": [
-        "Kryptic-Agent intercepts structural state errors in memory via microsecond homeostatic validation nodes.",
-        "Raw zero-buffering flash loggers preserve entire state machine operations safely through violent power loss.",
-        "Zero-latency design loops introduce under 1ms overhead, making it highly optimal for embedded systems."
-      ]
-    },
-    {
-      "slide_number": 3,
-      "header": "Vast Addressable Market Traction",
-      "bullets": [
-        "Primary Target: High-value defense tactical UAV manufacturing partnerships.",
-        "Secondary Target: Autonomous industrial robotics operating inside critical infrastructure.",
-        "Revenue Framework: Scalable per-device monthly SaaS fees matched against dedicated custom engineering implementation agreements."
-      ]
+    "investor_portal": {
+      "allow_convertible_note_downloads": true,
+      "require_nda_for_detailed_weights_spec": true,
+      "contact_handler": "Brandon Mark Wilson (Independent AI Software Engineer and Researcher)"
     }
-  ]
+  }
 }
