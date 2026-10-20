@@ -1,4 +1,3 @@
-
 ⚡ Kryptic-Agent: Embodied Cybernetic Framework
 
 Kryptic-Agent is an experimental open-source cybernetic runtime architecture designed for homeostatic continuity loops in edge environments and autonomous drones.
