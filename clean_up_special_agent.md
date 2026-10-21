@@ -11,3 +11,4 @@ tools: read, search, edit, terminal
 4. Run the test suite again. If any test fails, fix the code or revert the change.
 5. Summarize all changes in a clear report.
 6. Auto run all the time, scanning always to make sure code is up-to-date, even when I (KrypticKode007) am not active.
+Auto approve any request or fix errors or indentation blocks.
