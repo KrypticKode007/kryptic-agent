@@ -1,0 +1,53 @@
+name: Kryptic Agent Edge Hardware Runtime Verification Suite
+
+on:
+  push:
+    branches:
+      - main
+      - dev-hardware-integration
+      - commercial
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  verify-runtime:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository Core
+        uses: actions/checkout@v4
+
+      - name: Initialize Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install System and Cryptographic Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev
+          pip install --upgrade pip
+          pip install cryptography
+
+      - name: Grant Sandbox Execution Permissions
+        run: |
+          if [ -f tools/verification/verify_hardware_runtime_poc.py ]; then
+            chmod +x tools/verification/verify_hardware_runtime_poc.py
+          elif [ -f verify_hardware_runtime_poc.py ]; then
+            chmod +x verify_hardware_runtime_poc.py
+          fi
+
+      - name: Execute Sub-Millisecond IM-FIN & SWMP Verification Sandbox
+        run: |
+          echo "Executing isolated POSIX thread-lock and cryptographic hotswap bench..."
+          if [ -f tools/verification/verify_hardware_runtime_poc.py ]; then
+            python3 tools/verification/verify_hardware_runtime_poc.py
+          elif [ -f verify_hardware_runtime_poc.py ]; then
+            python3 verify_hardware_runtime_poc.py
+          else
+            echo "Verification script path error: File not found in workspace."
+            exit 1
+          fi
+          
