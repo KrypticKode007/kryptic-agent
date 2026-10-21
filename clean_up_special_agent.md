@@ -10,4 +10,4 @@ tools: read, search, edit, terminal
 3. Refactor messy components into clean, maintainable patterns.
 4. Run the test suite again. If any test fails, fix the code or revert the change.
 5. Summarize all changes in a clear report.
-6. Run all the time, scanning always to make sure code is up-to-date.
+6. Auto run all the time, scanning always to make sure code is up-to-date, even when I (KrypticKode007) am not active.
