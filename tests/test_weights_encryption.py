@@ -6,6 +6,7 @@ protocol for network consensus payloads under simulated transmission drift.
 
 import pytest
 import json
+import base64
 from encrypt_weights import WeightsEncryptionEngine
 
 def test_aes256_weights_wrapping_integrity():
@@ -29,8 +30,10 @@ def test_aes256_weights_wrapping_integrity():
     
     # Verify that the plaintext figures are obscured and formatted as structured json payloads
     payload_dict = json.loads(armored_payload_string)
+    assert "salt" in payload_dict
     assert "iv" in payload_dict
     assert "ciphertext" in payload_dict
+    assert "tag" in payload_dict
 
     # 3. Decrypt and verify payload blocks match structural baseline variables perfectly
     recovered_weights = engine.decrypt_parameter_payload(armored_payload_string)
@@ -51,4 +54,14 @@ def test_tampered_passphrase_exception_handling():
         engine_decrypt.decrypt_parameter_payload(secure_string)
     
     assert "Integrity failure" in str(exception_context.value)
+
+def test_tampered_ciphertext_is_rejected():
+    engine = WeightsEncryptionEngine("CorrectPassphrase123")
+    payload = json.loads(engine.encrypt_parameter_payload({"weights": [0.1, 0.2]}))
+    ciphertext = bytearray(base64.b64decode(payload["ciphertext"]))
+    ciphertext[0] ^= 1
+    payload["ciphertext"] = base64.b64encode(ciphertext).decode("utf-8")
+
+    with pytest.raises(ValueError, match="Integrity failure"):
+        engine.decrypt_parameter_payload(json.dumps(payload))
   

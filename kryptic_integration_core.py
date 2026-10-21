@@ -233,5 +233,5 @@ def execute_system_runtime():
     print("=" * 70)
     print("⚡ CORE FRAMEWORK PIPELINE EXECUTED SUCCESSFULLY")
     
-    if name == "main":
+if __name__ == "__main__":
     execute_system_runtime()

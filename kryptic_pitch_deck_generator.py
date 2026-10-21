@@ -1,24 +1,4 @@
-#!/bin/bash
-# =====================================================================
-# 🚀 AUTOMATED GIT DEPLOYMENT & ASSET PROVISIONING WORKFLOW
-# =====================================================================
-# Author: Brandon Mark Wilson (KrypticKode007)
-# Target Repository: kryptic-agent
-# Target Deployment Branch: feature/marketing-docs
-# =====================================================================
-
-# 1. Initialize local state and branch protection
-echo "📦 Initializing local repository branch structures..."
-git checkout main 2>/dev/null || git checkout -b main
-git pull origin main 2>/dev/null
-
-# 2. Create and switch to the marketing documentation feature branch
-echo "🌿 Provisioning feature branch: feature/marketing-docs..."
-git checkout -b feature/marketing-docs 2>/dev/null || git checkout feature/marketing-docs
-
-# 3. Inject the python script asset directly into the local environment
-echo "🐍 Generating pitch deck documentation script asset..."
-cat << 'EOF' > kryptic_pitch_deck_generator.py
+#!/usr/bin/env python3
 # =====================================================================
 # 🌐 ENTERPRISE ARCHITECTURE DOCUMENTATION & INVESTOR PITCH GENERATOR
 # =====================================================================
@@ -137,22 +117,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-EOF
-
-# 4. Enforce appropriate POSIX execution permissions
-chmod +x kryptic_pitch_deck_generator.py
-echo "✅ Permissions updated: kryptic_pitch_deck_generator.py is now executable."
-
-# 5. Track, stage, and execute the Git transaction
-echo "📝 Staging new enterprise marketing documentation files..."
-git add kryptic_pitch_deck_generator.py
-
-echo "💾 Committing assets locally..."
-git commit -m "feat(marketing-docs): integrate pitch deck generator infrastructure to branch"
-
-echo "📤 Pushing upstream to remote origin branch..."
-git push origin feature/marketing-docs
-
-echo "====================================================================="
-echo "⚡ SUCCESS: Branch feature/marketing-docs synced with remote repository."
-echo "====================================================================="
