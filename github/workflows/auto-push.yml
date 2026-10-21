@@ -1,0 +1,38 @@
+name: Auto Push Scripts
+
+on:
+  push:
+    branches:
+      - main
+  # Optional: Runs every day at midnight to check for updates
+  schedule:
+    - cron: '0 0 * * *' 
+  # Allows you to manually trigger the workflow from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  push-changes:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Check out the repository content
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: true
+
+    # Step 2: Make your automated changes here (Example: updating a timestamp file)
+    - name: Make Changes
+      run: |
+        echo "Last updated on $(date)" > last_update.txt
+
+    # Step 3: Commit and push the changes back to the repository
+    - name: Commit and Push
+      run: |
+        git config --local user.email "github-actions[bot]@://github.com"
+        git config --local user.name "github-actions[bot]"
+        git add .
+        # Only commit if there are actual changes to avoid workflow errors
+        git diff-index --quiet HEAD || git commit -m "Automated script update [skip ci]"
+        git push origin main
+        
