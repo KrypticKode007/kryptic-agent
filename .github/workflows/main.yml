@@ -77,7 +77,7 @@ jobs:
             cmake
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: https://github.com/KrypticKode007/kryptic-agent/actions?query=workflow%3ACodeQL+workflow%3A%22Dependabot+Updates%22+workflow%3A%22Dependency+Graph%22+workflow%3A%22Embodied+Cybernetic+Sentience+CI+Audit+Suite%22+workflow%3A%22GitHub+Agentic+Autofix%22+workflow%3A%22Kryptic-Agent+CI+Engine%22+workflow%3A%22Master+Workflow%22
         with:
           languages: cpp
           build-mode: manual
