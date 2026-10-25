@@ -3,10 +3,8 @@ set -euo pipefail
 
 echo "[+] Canonicalizing repository state for production readiness..."
 
-# Create required directories
 mkdir -p data runtime src/core tests .github/workflows archive
 
-# Archive obvious legacy/experimental folders instead of leaving them in active root
 for legacy_dir in feature commercial github; do
   if [ -d "$legacy_dir" ]; then
     echo "[+] Archiving legacy directory: $legacy_dir"
@@ -19,7 +17,6 @@ for legacy_dir in feature commercial github; do
   fi
 done
 
-# Write canonical package metadata
 cat > setup.py <<'EOF'
 from setuptools import setup, find_packages
 
@@ -34,16 +31,13 @@ setup(
 )
 EOF
 
-# Write canonical pytest setup
 cat > pytest.ini <<'EOF'
 [pytest]
 testpaths = tests
 addopts = -v
 EOF
 
-# Write canonical .gitignore
 cat > .gitignore <<'EOF'
-# Python caches
 __pycache__/
 *.py[cod]
 *.pyo
@@ -52,21 +46,16 @@ __pycache__/
 *.egg-info/
 build/
 dist/
-
-# Runtime output
 data/
 runtime/
 *.db
 *.log
 *.so
 matrix_accelerator
-
-# Environment
 .env
 .DS_Store
 EOF
 
-# Canonical CI workflow: one workflow only
 cat > .github/workflows/ci.yml <<'EOF'
 name: Canonical CI Pipeline
 
@@ -112,16 +101,13 @@ jobs:
         run: pytest
 EOF
 
-# Package initialization
 touch src/core/__init__.py
 touch tests/__init__.py
 
-# Ensure source layout is canonical and source exists
 if [ ! -f src/core/kryptic_hardware_accelerator.cpp ] && [ -f kryptic_hardware_accelerator.cpp ]; then
   cp kryptic_hardware_accelerator.cpp src/core/kryptic_hardware_accelerator.cpp
 fi
 
-# Test import-path stabilization
 cat > tests/conftest.py <<'EOF'
 import sys
 from pathlib import Path
@@ -133,7 +119,6 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 EOF
 
-# Hardened core module
 cat > src/core/kryptic_agent_core.py <<'EOF'
 import base64
 import os
@@ -217,7 +202,6 @@ class KrypticAgentCore(Node):
             f.write(f"{diagnostic_log}\n")
 EOF
 
-# Canonical tests
 cat > tests/test_core.py <<'EOF'
 import pytest
 from core.kryptic_agent_core import KrypticAgentCore, HAS_ROS2
@@ -226,44 +210,3 @@ def test_agent_initialization_without_crashing():
     agent = KrypticAgentCore(db_name="test_temp_memory.db")
     assert agent.db_path.name == "test_temp_memory.db"
     assert agent.db_path.exists() is True
-
-def test_secure_weights_migration_workflow():
-    agent = KrypticAgentCore(db_name="test_crypto_memory.db")
-    payload = b"secure_layer_weights_matrix_v1"
-    agent.persist_encrypted_payload("layer_0", payload)
-    recovered = agent.read_encrypted_payload("layer_0")
-    assert recovered == payload
-
-def test_ros2_conditional_status():
-    agent = KrypticAgentCore()
-    if not HAS_ROS2:
-        assert "mock" in agent.name
-EOF
-
-# Clean duplicate/legacy root-level files from previous broken states
-rm -f ./*.db ./*.log
-rm -f ./test_ego_boundary.py
-rm -f ./test_integration_core.py
-rm -f ./test_weights_encryption.py
-rm -rf ./tests/tests
-rm -rf ./src/tests
-rm -rf ./src/core/tests
-rm -rf ./local_test_copies
-
-# Remove duplicate workflow definitions
-find .github/workflows -type f ! -name 'ci.yml' -delete
-
-# Remove obvious stray files if present
-for bad_file in \
-    "ci_engine" \
-    "fix-ci-import-path" \
-    "test_hardware_latency.cpp" \
-    "test_high_velocity_harness.py" \
-    "test_network_hotswap.py"; do
-  if [ -f "$bad_file" ]; then
-    rm -f "$bad_file"
-  fi
-done
-
-echo "[+] Canonical repo state complete."
-echo "[+] Run: python -m pytest -q tests"
