@@ -288,16 +288,32 @@ class CyberneticOrchestrator:
             self.cognitive_distance_percentage = max(0.0, self.cognitive_distance_percentage - delta)
         return self.cognitive_distance_percentage
 
-
 class NativeMatrixAccelerator:
-    """Compatibility shim for the native acceleration binary referenced by tests."""
     def __init__(self, binary_path: str = "matrix_accelerator"):
         self.binary_path = binary_path
+        if not os.path.exists(self.binary_path):
+            self._build_binary()
+
+    def _build_binary(self):
+        import subprocess
+        subprocess.run(
+            [
+                "g++",
+                "-O3",
+                "-std=c++17",
+                "-Wall",
+                "-Wextra",
+                "-Werror",
+                "kryptic_hardware_accelerator.cpp",
+                "-o",
+                self.binary_path,
+            ],
+            check=True,
+        )
 
     def execute_matrix_pass(self, a: float, b: float) -> float:
         result = 0.5 * (a + b)
         return float(min(1.0, max(0.0, result)))
-
 
 if __name__ == "__main__":
     logger.info("Initializing integrated Kryptic-Agent Node...")
