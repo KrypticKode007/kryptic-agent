@@ -1,0 +1,53 @@
+name: Kryptic-Agent CI/CD Verification Engine
+
+on:
+  push:
+    branches: [ main, release/*, staging/* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-sqlite3
+
+      - name: Install Framework Core Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pytest numpy fastapi uvicorn
+
+      - name: Execute PyTest Automation Regression Module
+        run: |
+          pytest tests/test_kryptic_core.py -v --durations=5
+
+  compile-native-binary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Install Toolchain and ROS 2 Minimal Headers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake
+
+      - name: Configure and Compile Bare-Metal Latency Driver
+        run: |
+          cd src/cpp_tracker
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make
+          
