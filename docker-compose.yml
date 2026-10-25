@@ -1,17 +1,20 @@
 version: '3.8'
 
 services:
-  kryptic-node:
+  kryptic_edge_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: running-kryptic-node
-    image: kryptic-agent-edge:latest
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
+      - kryptic_persistence_volume:/app/data
+    environment:
+      - PERSISTENCE_DB_PATH=/app/data/kryptic_agent_persistence.db
     restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-        
+
+volumes:
+  kryptic_persistence_volume:
+    driver: local
+    
