@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CycloneDDS xmlns="https://cdds.io" xmlns:xsi="http://w3.org" xsi:schemaLocation="https://cdds.io https://githubusercontent.com">
+    <Domain id="42">
+        <General>
+            <NetworkInterfaceAddress>127.0.0.1</NetworkInterfaceAddress>
+            <AllowMulticast>false</AllowMulticast>
+            <MaxMessageSize>65536</MaxMessageSize>
+        </General>
+        <Discovery>
+            <MaxAutoParticipantIndex>10</MaxAutoParticipantIndex>
+            <ParticipantIndex>auto</ParticipantIndex>
+        </Discovery>
+        <Internal>
+            <Watermarks>
+                <WhcHigh>5242880</WhcHigh>
+                <WhcLow>1048576</WhcLow>
+            </Watermarks>
+            <SocketReceiveBufferSize min="10485760"/>
+            <SocketSendBufferSize min="10485760"/>
+        </Internal>
+    </Domain>
+</CycloneDDS>
+          
