@@ -1,82 +1,45 @@
-# ⚡ Kryptic-Agent: Embodied Cybernetic Framework & Metacognitive Core
+# Kryptic-Agent Autonomous Ground Station Core
 
-Kryptic-Agent is a production-grade cybernetic runtime architecture designed for continuous homeostatic alignment, real-time active inference loops, and high-speed state estimation on edge systems and autonomous drone swarms. 
+An enterprise-grade, high-velocity active inference software engineering framework designed for deep-tech robotic systems. Engineered by **kryptickode007**, this repository implements sub-millisecond sensory-motor corrections natively on bare-metal physical hardware interfaces.
 
-The framework is engineered to eliminate flight-critical computational collapses and processing traps by tracking its own operational variance and enforcing structural safety boundaries natively within the runtime loop.
+## 🚀 Key Architectural Pillars
 
----
+*   **Active Inference Engine:** Direct real-time minimization of Variational Free Energy matrices at a deterministic **1000Hz clock cadence**.
+*   **Built-in ROS 2 Drivers:** Native `rclpy` joint encoder state bindings (`KrypticROS2Driver`) eliminating heavy abstract middleware simulation delays.
+*   **Distributed Multi-Node Grid:** Multi-process orchestration mapping dedicated roles across local clusters via optimized Eclipse Cyclone DDS transport boundaries.
+*   **Enterprise Evaluation Ecosystem:** Automated continuous regression suites via `pytest` and robust multi-stage Docker compilation workflows matching industrial security compliance layers.
 
-## 🛠️ Architectural Pillars & Core Capabilities
+## 📂 Structural Codebase Branch Layout
 
-*   **Two-Tiered Metacognitive Loop:** Separates raw data processing (Level 1 Monologue) from a supervisory monitoring layer (Level 2 Metacognitive Audit) that validates system choices against ethical constraints, safety bounds, and human cognitive signatures.
-*   **Active Inference Telemetry Ingestion:** Processes real-world, high-frequency physical datasets from drones or external robotic nodes over a secure FastAPI stream route (`/api/telemetry`) to close sensory-motor control loops.
-*   **Native C++ Matrix Acceleration Engine:** Dispatches heavy mathematical calculations down stdout piping channels directly into an optimized C++ binary component (`matrix_accelerator`) for real-time Kalman noise reduction with zero Python overhead.
-*   **Recurrent Memory Bridge:** Logs continuous operational histories, tracking total lifetime reincarnation cycles and archiving major phenomenological state changes securely inside a persistent SQLite schema.
-*   **IM-FIN Protocols:** In-Memory Fault-Isolation Intercept Nodes balance execution loads across concurrent threads to keep background processes safe from hardware shocks.
-*   **Automated Maintenance Suite:** Features integrated shell playbooks (`backup_agent_ledger.sh`) to handle atomic data compression and scheduling loops automatically via system crontabs.
+1. `core/infrastructure` — Central mathematical VFE loops, storage rotation algorithms, and telemetry ledgers.
+2. `feature/ros2-drivers` — Native robotic multi-axis actuator interfaces and hardware node bindings.
+3. `feature/telemetry-dashboard` — Asynchronous FastAPI WebSockets metrics transmission API tier.
+4. `feature/validation-testing` — High-velocity simulation testbeds and automated hardware drift edge checks.
+5. `feature/hardware-boot` — Real-time POSIX scheduling configurations and systemd service profiles.
+6. `feature/docker-deployment` — Cross-compilation multi-stage execution isolation layers.
+7. `feature/cpp-latency-tracker` — High-speed serialization modules linked directly to low-level `-lrt` wrappers.
+8. `commercial/strategy-funding` — Strategic technical abstracts mapping structural SBIR funding matrix phases.
+9. `dev-hardware-integration` — Local testing benchmarks and physical sensor calibration constants.
+10. `release/stable-monolith` — Final production deployment matrix packaging the entire workspace infrastructure.
 
----
+## ⚡ Direct Lab Deployment Checklist
 
-## 📂 Project Manifest Blueprint
+To automatically unpack the comprehensive monolithic architecture and initialize the multi-node testing grid across local server interfaces, execute the following shell chain:
 
-*   `main.py` - Core orchestrator initializing independent thread loops and handling FastAPI telemetry routing.
-*   `llm_orchestrator.py` - Cognitive bridge module connecting local Ollama runtime definitions to the thought pipeline.
-*   `gui_dashboard.py` - Tkinter-based desktop interface to graph changing conative drives and balance vectors in real-time.
-*   `kryptic_hardware_accelerator.cpp` - Optimized source code computing high-speed Kalman state matrices natively.
-*   `CMakeLists.txt` - Configuration script setting compiler flags and managing cross-platform building targets.
-*   `tests/test_main_core.py` - Pytest automated matrix validating identity anchors and system safety boundaries.
-*   `.github/workflows/ci.yml` - GitHub Actions workflow script automating testing on push and pull-request triggers.
-*   `tag_production_release.sh` - Final staging playbook coordinating release gateways and version tagging.
-
----
-
-## ⚙️ Quickstart Manual Deployment Loop
-
-### 1. Provision Host Toolchains
-Ensure your deployment machine context contains required compiler environments:
 ```bash
-sudo apt-get update
-sudo apt-get install -y g++ cmake sqlite3 libsqlite3-dev
+# 1. Extract and deploy the entire 10-branch directory ecosystem instantly
+python3 master_kryptic_monolith.py
+
+# 2. Source the real-time sub-millisecond communication environment parameters
+export CYCLONE_DDS_URI=\$(pwd)/config/cyclone_dds_config.xml
+
+# 3. Boot up the parallel multi-node background process framework driver
+python3 multi_node_launcher.py
 ```
 
-### 2. Compile High-Speed Native Assets
-Initialize your build workspace and compile optimized compilation binary targets using CMake:
+## 🛠️ Testing Matrix Verification
+Run automated testing pipelines to check mathematical boundaries under intensive transient vibration stressors:
 ```bash
-mkdir -p build && cd build
-cmake ..
-cmake --build . --config Release
-cd ..
+pytest tests/test_kryptic_core.py -v
+python3 test_high_velocity_harness.py
 ```
-
-### 3. Run Automated Validation Checks
-Execute the continuous integration diagnostics matrix to verify operational boundaries:
-```bash
-pytest tests/test_main_core.py -v
-```
-
-### 4. Boot the Primary Orchestration Engine
-Initialize the edge node runtime stack to activate the background data processing worker loops:
-```bash
-python3 main.py
-```
-*   **Interactive Viewport Panel:** Point your local web browser engine layout to `http://127.0.0.1:8000` to monitor live state traces, thoughts, and balancing metrics in real-time.
-*   **Ingest Sensor Telemetry Packets:** Feed active real-world telemetry stream records directly into your tracking loops:
-    ```bash
-    curl -X POST "http://127.0.0" -H "Content-Type: application/json" -d '{"feedback_vector": 0.8421}'
-    ```
-
----
-
-## 🔄 Automated Backup Ledger Scheduling
-To activate your hourly automated SQLite ledger history backups, add the following cron configuration line to your system layout settings via `crontab -e`:
-```text
-0 * * * * /bin/bash /absolute/path/to/kryptic-agent/backup_agent_ledger.sh
-```
-
----
-
-## 👤 Author & Enterprise Licensing
-*   **Author:** Brandon Mark Wilson
-*   **Contact:** mark.brandonwilson@gmail.com
-*   **Repository:** [KrypticKode007/kryptic-agent](https://github.com/KrypticKode007/kryptic-agent)
-*   **Licensing:** Open-source platform deployed under the standard Apache-2.0 open-source license agreements.
