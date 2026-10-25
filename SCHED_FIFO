@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kryptic-Agent Telemetry Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #0f141c;
+            --card-bg: #1a2332;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent-blue: #00e5ff;
+            --accent-red: #ff3366;
+            --accent-green: #00ff66;
+            --border-color: #2e3f53;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: monospace;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .canvas-container {
+            width: 100%;
+            height: 200px;
+            background: #090d14;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        button {
+            background: var(--accent-red);
+            color: #000;
+            font-weight: bold;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button.stop-btn {
+            background: var(--accent-green);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="canvas-container">
+        <canvas id="scopeCanvas"></canvas>
+    </div>
+    <div class="controls">
+        <span id="statusBadge" class="status-badge">HARDWARE_LOOP_ACTIVE</span>
+        <button id="toggleLoopBtn">Halt Physical Actuators</button>
+    </div>
+    <div style="display:none;">
+        <span id="latencyMetric">0.00 ms</span>
+        <span id="driftMetric">0.000 mm</span>
+        <span id="vfeMetric">0.000</span>
+        <span id="motorMetric">0.00 V</span>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('scopeCanvas');
+    const ctx = canvas.getContext('2d');
+    const statusBadge = document.getElementById('statusBadge');
+    const toggleLoopBtn = document.getElementById('toggleLoopBtn');
+    const latencyMetric = document.getElementById('latencyMetric');
+    const driftMetric = document.getElementById('driftMetric');
+    const vfeMetric = document.getElementById('vfeMetric');
+    const motorMetric = document.getElementById('motorMetric');
+
+    let loopActive = true;
+    let isSchedFifo = true;
+    let dataHistory = Array(120).fill(0.95);
+
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+    }
+    resizeCanvas();
+
+    // FIXED: Correctly closed loop execution structure wrapped safely
+    function hardwareLoop() {
+        if (!loopActive) return;
+
+        // Telemetry calculation emulation logic
+        let baseLatency = isSchedFifo ? 0.95 : 1.35;
+        let finalLatency = baseLatency + (Math.random() * 0.05);
+        
+        dataHistory.push(finalLatency);
+        if (dataHistory.length > 120) {
+            dataHistory.shift();
+        }
+
+        renderScope(finalLatency, isSchedFifo);
+        requestAnimationFrame(hardwareLoop);
+    }
+
+    // Render oscilloscope tracking history
+    function renderScope(currentLatency, isSchedFifo) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw 1ms Target Horizontal Pacing Boundary line
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        let yTarget = canvas.height - (1.0 / 4.0) * canvas.height;
+        ctx.moveTo(0, yTarget);
+        ctx.lineTo(canvas.width, yTarget);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.font = '10px monospace';
+        ctx.fillText('1.0ms Window Threshold', 10, yTarget - 6);
+
+        // Draw dynamic latency signal path line
+        ctx.strokeStyle = isSchedFifo ? varStyle('--accent-blue') : varStyle('--accent-red');
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        
+        let step = canvas.width / (dataHistory.length - 1);
+        for (let i = 0; i < dataHistory.length; i++) {
+            let val = dataHistory[i];
+            let y = canvas.height - (val / 4.0) * canvas.height;
+            if (i === 0) {
+                ctx.moveTo(0, y);
+            } else {
+                ctx.lineTo(i * step, y);
+            }
+        }
+        ctx.stroke();
+    }
+
+    function varStyle(name) {
+        let value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        return value ? value : (name === '--accent-blue' ? '#00e5ff' : '#ff3366');
+    }
+
+    // Interactive button controls listener setup
+    toggleLoopBtn.addEventListener('click', () => {
+        loopActive = !loopActive;
+        if (loopActive) {
+            statusBadge.innerText = 'HARDWARE_LOOP_ACTIVE';
+            statusBadge.className = 'status-badge';
+            toggleLoopBtn.innerText = 'Halt Physical Actuators';
+            toggleLoopBtn.className = '';
+            hardwareLoop();
+        } else {
+            statusBadge.innerText = 'SYSTEM_HALTED';
+            statusBadge.className = 'status-badge stopped';
+            toggleLoopBtn.innerText = 'Re-Engage Hardware Core';
+            toggleLoopBtn.className = 'stop-btn';
+            
+            // Clear fields on shutdown
+            latencyMetric.innerText = '0.00 ms';
+            driftMetric.innerText = '0.000 mm';
+            vfeMetric.innerText = '0.000';
+            motorMetric.innerText = '0.00 V';
+        }
+    });
+
+    // Fire hardware thread automatically on load
+    hardwareLoop();
+</script>
+
+</body>
+</html>
