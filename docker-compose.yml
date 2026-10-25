@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  kryptic-node:
+    container_name: running-kryptic-node
+    image: kryptic-agent-edge:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        
