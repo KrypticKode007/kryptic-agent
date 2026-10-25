@@ -1,29 +1,28 @@
-# filename: CMakeLists.txt
-cmake_minimum_required(VERSION 3.8)
-project(kryptic_hardware_core)
+cmake_minimum_required(VERSION 3.16)
+project(kryptic_hardware_core LANGUAGES CXX)
 
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-O3 -Wall -Wextra -Wpedantic)
 endif()
 
-# Strict bare-metal compilation optimization flags
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(
-    -O3                    # Enable maximum code execution speed optimization
-    -march=native          # Optimize instructions explicitly for the host system chip
-    -ffast-math            # Bypass strict IEEE math compliance for hyper-fast vector math
-    -Wall -Wextra -Werror  # Strict build warning enforcement
-  )
-endif()
+add_executable(kryptic_hardware_accelerator
+    kryptic_hardware_accelerator.cpp
+)
 
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
+target_include_directories(kryptic_hardware_accelerator
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
-# Link native POSIX real-time system tracking library (-lrt)
-link_libraries(rt)
+add_executable(test_hardware_latency
+    test_hardware_latency.cpp
+)
 
-add_executable(robotic_sentience_core src/robotic_sentience_core.cpp)
-target_link_libraries(robotic_sentience_core PRIVATE rclcpp std_msgs)
-
-ament_package()
+target_include_directories(test_hardware_latency
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
