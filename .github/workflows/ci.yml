@@ -28,14 +28,13 @@ jobs:
     - name: Install Python Package Infrastructure
       run: |
         python -m pip install --upgrade pip
-        pip install pytest fastapi uvicorn requests
+        pip install pytest fastapi uvicorn requests cryptography
 
     - name: Compile High-Speed Native Matrix Accelerator Binary
       run: |
-        g++ -O3 -std=c++17 kryptic_hardware_accelerator.cpp -o matrix_accelerator
+        g++ -O3 -std=c++17 -Wall -Wextra -Werror kryptic_hardware_accelerator.cpp -o matrix_accelerator
         chmod +x matrix_accelerator
 
     - name: Execute Cybernetic Validation Testing Matrix
       run: |
-        pytest tests/test_main_core.py -v
-        
+        pytest tests -v
