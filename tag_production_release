@@ -1,0 +1,9 @@
+# 1. Verify and compile optimization flags manually via your build system
+chmod +x tag_production_release.sh
+./tag_production_release.sh
+
+# 2. Boot the entire container stack alongside your data volumes using Docker Compose
+docker-compose up -d --build
+
+# 3. Confirm that the application layer is listening on its designated endpoint
+curl -s http://127.0.0.1:8000 | grep -o "Brandon Mark Wilson"
