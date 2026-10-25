@@ -1,4 +1,3 @@
-<!-- filename: kryptic_hardware_launch.py -->
 import os
 from launch import LaunchDescription
 from launch_ros.actions import Node
