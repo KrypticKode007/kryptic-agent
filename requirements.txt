@@ -1,0 +1,4 @@
+fastapi==0.115.x
+uvicorn==0.32.x
+requests==2.32.x
+pytest==8.x.x
