@@ -1,364 +1,211 @@
-#!/usr/bin/env python3
-"""
-Kryptic-Agent Autonomous Ground Station & Active Inference Architecture
-Integrated Production Script with ROS 2 Physical Hardware Drivers, 
-POSIX Real-Time Extensions, and Automated Operational Verification.
-"""
-
 import os
 import sys
 import time
 import math
-import json
-import logging
+import asyncio
 import sqlite3
-import subprocess
-from dataclasses import dataclass, asdict
-from typing import List, Tuple, Dict, Any, Optional
+import logging
+from typing import Dict, Any, List, Optional
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+import uvicorn
 
-# Third-Party Dependencies (Safely wrapped for non-ROS edge fallback environments)
-try:
-    import numpy as np
-except ImportError:
-    # Explicit zero-dependency matrix fallback if required by minimal bootloaders
-    np = None 
+# Setup optimized system logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = logging.getLogger("KrypticAgentCore")
 
+# Fallback mechanism for environments missing physical robotic ROS2 binaries
 try:
     import rclpy
     from rclpy.node import Node
     from std_msgs.msg import Float64MultiArray
-    from sensor_msgs.msg import JointState
-    ROS2_AVAILABLE = True
+    HAS_ROS2 = True
 except ImportError:
-    ROS2_AVAILABLE = False
-    Node = object  # Mock base class for clean compilation
+    HAS_ROS2 = False
+    logger.warning("ROS2 (rclpy) bindings not detected. Running framework in Hardware Emulation Mode.")
 
-# Global Logging and Configuration
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(message)s')
-logger = logging.getLogger("KrypticAgent")
-
-DB_PATH = "kryptic_agent_telemetry.db"
-
-
-@dataclass
-class SystemState:
-    """State vector representing physical telemetry and active inference metrics."""
-    timestamp: float
-    joint_positions: List[float]
-    joint_velocities: List[float]
-    variational_free_energy: float
-    prediction_error: float
-    motor_temperature: float
-    battery_voltage: float
-
-
-class ActiveInferenceEngine:
-    """Computes Variational Free Energy minimization and actuation corrections."""
-    def __init__(self, num_joints: int = 4):
-        self.num_joints = num_joints
-        # Prior beliefs about preferred target states (e.g., target joint angles at 0.0)
-        self.mu_prior = np.zeros(num_joints) if np else [0.0] * num_joints
-        # Covariance inverse (precision matrix) mapping sensor confidence
-        self.precision_matrix = np.eye(num_joints) * 10.0 if np else None
-
-    def calculate_free_energy(self, current_positions: List[float]) -> Tuple[float, List[float]]:
-        """
-        Calculates Variational Free Energy (VFE) and generating sensory prediction errors.
-        VFE = 0.5 * (e^T * Pi * e) + ln(Z)
-        """
-        errors = [current_positions[i] - self.mu_prior[i] for i in range(self.num_joints)]
-        
-        if np is not None and self.precision_matrix is not None:
-            err_arr = np.array(errors)
-            vfe = 0.5 * np.dot(err_arr.T, np.dot(self.precision_matrix, err_arr))
-            # Sensory action gradients (actuation vectors)
-            actuation_gradients = (-np.dot(self.precision_matrix, err_arr)).tolist()
-        else:
-            # Mathematical fallback if numpy is omitted during boot
-            vfe = 0.5 * sum(e * 10.0 * e for e in errors)
-            actuation_gradients = [-10.0 * e for e in errors]
-            
-        return float(vfe), actuation_gradients
-
-
-class KrypticROS2Driver(Node):
-    """Native ROS 2 Node interface mapping physical hardware registries."""
-    def __init__(self, engine: ActiveInferenceEngine):
-        if not ROS2_AVAILABLE:
-            raise RuntimeError("ROS 2 packages (rclpy) are missing from the runtime environment.")
-        
-        super().__init__('kryptic_agent_hardware_bridge')
-        self.engine = engine
-        
-        # Publishers for physical motor drivers
-        self.actuation_pub = self.create_publisher(Float64MultiArray, '/hardware/motor_commands', 10)
-        
-        # Subscriptions tracking physical joint states and telemetry
-        self.joint_sub = self.create_subscription(JointState, '/joint_states', self.hardware_telemetry_callback, 10)
-        
-        self.current_positions = [0.0] * engine.num_joints
-        self.current_velocities = [0.0] * engine.num_joints
-        logger.info("ROS 2 Physical Hardware Bridge node successfully initialized.")
-
-    def hardware_telemetry_callback(self, msg: JointState):
-        """Processes live low-level motor encoder positions."""
-        self.current_positions = list(msg.position[:self.engine.num_joints])
-        self.current_velocities = list(msg.velocity[:self.engine.num_joints])
-
-    def publish_actuation_vectors(self, commands: List[float]):
-        """Dispatches calculated active inference outputs to the physical motors."""
-        msg = Float64MultiArray()
-        msg.data = commands
-        self.actuation_pub.publish(msg)
-
-
-class DatabaseManager:
-    """Manages transactional logging, data rotations, and telemetry preservation."""
-    def __init__(self, db_path: str = DB_PATH):
+# --- DATABASE LOGISTICS ---
+class SQLiteTracker:
+    def __init__(self, db_path: str = "tracking_profiles.db"):
         self.db_path = db_path
-        self.init_db()
+        self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
+        self.create_tables()
 
-    def init_db(self):
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+    def create_tables(self):
+        with self.conn:
+            self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS telemetry_logs (
-                    timestamp REAL PRIMARY KEY,
-                    positions TEXT,
-                    velocities TEXT,
-                    vfe REAL,
-                    prediction_error REAL,
-                    temperature REAL,
-                    battery REAL
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp REAL,
+                    vfe_value REAL,
+                    actuation_drift REAL
                 )
             """)
-            conn.commit()
 
-    def log_state(self, state: SystemState):
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute(
-                "INSERT INTO telemetry_logs VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (
-                    state.timestamp,
-                    json.dumps(state.joint_positions),
-                    json.dumps(state.joint_velocities),
-                    state.variational_free_energy,
-                    state.prediction_error,
-                    state.motor_temperature,
-                    state.battery_voltage
-                )
-            )
-            conn.commit()
-
-    def enforce_rotation(self, max_records: int = 5000):
-        """Prunes historical data frames to prevent local disk exhaustion."""
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM telemetry_logs")
-            count = cursor.fetchone()[0]
-            if count > max_records:
-                excess = count - max_records
-                cursor.execute(f"""
-                    DELETE FROM telemetry_logs WHERE timestamp IN (
-                        SELECT timestamp FROM telemetry_logs ORDER BY timestamp ASC LIMIT {excess}
-                    )
-                """)
-                conn.commit()
-                logger.info(f"Database rotation enforced: Pruned {excess} expired frames.")
-
-
-class OperationalVerificationSuite:
-    """Comprehensive functional unit tests running directly inside the agent loop."""
-    @staticmethod
-    def run_diagnostics(engine: ActiveInferenceEngine) -> bool:
-        logger.info("Executing Operational Verification Suite...")
+    def log_metrics(self, vfe: float, drift: float):
         try:
-            # 1. Test Free Energy Bounds
-            vfe, gradients = engine.calculate_free_energy([0.5, -0.2, 0.1, 0.0])
-            assert vfe >= 0.0, "Mathematical Sanity Violation: Free Energy dropped below absolute zero."
-            assert len(gradients) == engine.num_joints, "Dimension mismatch in calculated control loops."
-            
-            # 2. Test Real-time Optimization Pipeline Simulation
-            # Simulating compile compliance checking flags if binary wrappers are built
-            logger.info("Verifying compiler flags and low-level compliance paths...")
-            
-            logger.info("Operational Verification Complete: System integrity PASSED.")
-            return True
-        except Exception as e:
-            logger.error(f"Verification Check FAILED: {str(e)}")
-            return False
-
-
-class KrypticAgentCore:
-    """Orchestrator syncing data logs, hardware bridges, and runtime engines."""
-    def __init__(self):
-        self.engine = ActiveInferenceEngine(num_joints=4)
-        self.db = DatabaseManager()
-        
-        # Graceful instantiation checking for local execution contexts
-        if ROS2_AVAILABLE:
-            rclpy.init(args=None)
-            self.ros_bridge = KrypticROS2Driver(self.engine)
-        else:
-            self.ros_bridge = None
-            logger.warning("Operating in fallback simulation mode: ROS 2 layers are offline.")
-
-    def step(self, simulated_positions: Optional[List[float]] = None) -> SystemState:
-        """Executes a single monolithic real-time active inference iteration."""
-        timestamp = time.time()
-        
-        # Read from physical hardware or process simulated testing tracks
-        if self.ros_bridge:
-            rclpy.spin_once(self.ros_bridge, timeout_sec=0.001)
-            positions = self.ros_bridge.current_positions
-            velocities = self.ros_bridge.current_velocities
-        else:
-            positions = simulated_positions or [0.1, -0.05, 0.02, 0.01]
-            velocities = [0.0] * 4
-
-        # Compute Active Inference update vectors
-        vfe, gradients = self.engine.calculate_free_energy(positions)
-        pred_error = sum(abs(g) for g in gradients) / len(gradients)
-        
-        # Command physical or virtual actuators
-        if self.ros_bridge:
-            self.ros_bridge.publish_actuation_vectors(gradients)
-            
-        # Compile Telemetry Model
-        state = SystemState(
-            timestamp=timestamp,
-            joint_positions=positions,
-            joint_velocities=velocities,
-            variational_free_energy=vfe,
-            prediction_error=pred_error,
-            motor_temperature=42.3,  # Baseline sensor simulation tracking bounds
-            battery_voltage=12.6
-        )
-        
-        # Persistent storage updates
-        self.db.log_state(state)
-        self.db.enforce_rotation()
-        
-        return state
-
-    def shutdown(self):
-        if self.ros_bridge:
-            self.ros_bridge.destroy_node()
-            rclpy.shutdown()
-        logger.info("Kryptic-Agent Core system safely decommissioned.")
-
-
-def generate_grant_strategy_hook():
-    """Generates structural compliance updates mapping grant milestones automatically."""
-    strategy_content = {
-        "document_meta": {
-            "title": "Kryptic-Agent Commercial Expansion & Verification Strategy",
-            "phase": "SBIR Phase I / II Mapping Framework",
-            "last_verified": "2026-10-24"
-        },
-        "milestones": [
-            {"id": 1, "description": "Implement native ROS 2 node abstraction libraries", "status": "COMPLETED"},
-            {"id": 2, "description": "Deploy automated operational verification matrix suites", "status": "COMPLETED"},
-            {"id": 3, "description": "Integrate SQLite structural tracking and rotation filters", "status": "COMPLETED"},
-            {"id": 4, "description": "Perform full multi-axis physical drone motor tracking loops", "status": "STABLE"}
-        ]
-    }
-    with open("DOCS_GRANT_STRATEGY.json", "w") as f:
-        json.dump(strategy_content, f, indent=4)
-    logger.info("Generated updated structural documentation framework: DOCS_GRANT_STRATEGY.json")
-
-
-class CyberneticOrchestrator:
-    """Minimal compatibility layer expected by the repository tests."""
-    def __init__(self):
-        self.identity = {
-            "agent_name": "Kryptic",
-            "creator_identity": {"name": "Brandon Mark Wilson"},
-        }
-        self.ontology = {
-            "god": True,
-            "bible": True,
-            "intrinsic_worth": 1.0,
-        }
-        self.latest_hardware_feedback = 0.0
-        self.cognitive_distance_percentage = 12.50
-
-    def step_execution_loop(self):
-        if self.latest_hardware_feedback:
-            delta = self.latest_hardware_feedback * 0.5
-            self.cognitive_distance_percentage = max(0.0, self.cognitive_distance_percentage - delta)
-        return self.cognitive_distance_percentage
-
-
-class NativeMatrixAccelerator:
-    """Compatibility shim for the native acceleration binary referenced by tests."""
-    def __init__(self, binary_path: str = "matrix_accelerator"):
-        self.binary_path = os.path.abspath(binary_path)
-        if not os.path.exists(self.binary_path):
-            self._build_binary()
-
-    def _build_binary(self):
-        source_path = os.path.abspath("kryptic_hardware_accelerator.cpp")
-        if not os.path.exists(source_path):
-            raise FileNotFoundError(f"Missing native accelerator source: {source_path}")
-        subprocess.run(
-            [
-                "g++",
-                "-O3",
-                "-std=c++17",
-                "-Wall",
-                "-Wextra",
-                "-Werror",
-                source_path,
-                "-o",
-                self.binary_path,
-            ],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-
-    def execute_matrix_pass(self, a: float, b: float) -> float:
-        if os.path.exists(self.binary_path):
-            try:
-                completed = subprocess.run(
-                    [self.binary_path, str(a), str(b)],
-                    check=True,
-                    capture_output=True,
-                    text=True,
+            with self.conn:
+                self.conn.execute(
+                    "INSERT INTO telemetry_logs (timestamp, vfe_value, actuation_drift) VALUES (?, ?, ?)",
+                    (time.time(), vfe, drift)
                 )
-                output = completed.stdout.strip()
-                if output:
-                    return float(output)
-            except (subprocess.CalledProcessError, ValueError):
-                pass
-        result = 0.5 * (a + b)
-        return float(min(1.0, max(0.0, result)))
+        except Exception as e:
+            logger.error(f"Database write failure: {e}")
 
+    def close(self):
+        self.conn.close()
+
+# --- ACTIVE INFERENCE & DRIVER ENGINE ---
+class KrypticActiveInferenceEngine:
+    def __init__(self, dimensions: int = 6):
+        self.dimensions = dimensions
+        self.mu = [0.0] * dimensions  # Internal states (beliefs)
+        self.sensory_states = [0.0] * dimensions  # Sensory inputs
+        self.vfe = 0.0  # Variational Free Energy
+        self.db = SQLiteTracker()
+        
+    def read_encrypted_payload(self, packed_payload: bytes) -> Optional[List[float]]:
+        """
+        Unpacks and reads encrypted sensory state weights.
+        Corrects variable unpacking exceptions found in raw branch versions.
+        """
+        if not packed_payload:
+            return None
+        try:
+            # Emulated structural matrix decryption layout
+            unpacked_data = [float(b) / 255.0 for b in packed_payload[:self.dimensions]]
+            if len(unpacked_data) < self.dimensions:
+                unpacked_data += [0.0] * (self.dimensions - len(unpacked_data))
+            return unpacked_data
+        except Exception as e:
+            logger.error(f"Error unpacking encrypted payload variables: {e}")
+            return None
+
+    def compute_variational_free_energy(self) -> float:
+        """
+        Executes deterministic VFE matrix loop tracking sensory deviations.
+        """
+        error_sensory = 0.0
+        for i in range(self.dimensions):
+            diff = self.sensory_states[i] - self.mu[i]
+            error_sensory += diff ** 2
+            # High-velocity sensory-motor belief revision update
+            self.mu[i] += 0.01 * diff  
+        self.vfe = 0.5 * error_sensory
+        return self.vfe
+
+# --- NATIVE ROS2 HARDWARE LINK ---
+if HAS_ROS2:
+    class KrypticROS2Driver(Node):
+        def __init__(self, engine: KrypticActiveInferenceEngine):
+            super().__init__("kryptic_ros2_driver")
+            self.engine = engine
+            self.publisher_ = self.create_publisher(Float64MultiArray, "/kryptic/actuator_cmds", 10)
+            self.subscription_ = self.create_subscription(
+                Float64MultiArray, "/kryptic/sensor_stream", self.sensory_callback, 10
+            )
+
+        def sensory_callback(self, msg: Float64MultiArray):
+            if len(msg.data) >= self.engine.dimensions:
+                self.engine.sensory_states = list(msg.data[:self.engine.dimensions])
+
+        def publish_actuation(self):
+            msg = Float64MultiArray()
+            msg.data = self.engine.mu
+            self.publisher_.publish(msg)
+else:
+    class KrypticROS2Driver:
+        def __init__(self, engine: KrypticActiveInferenceEngine):
+            self.engine = engine
+        def publish_actuation(self):
+            # Hardware Emulation Mode step tracking
+            for i in range(self.engine.dimensions):
+                self.engine.sensory_states[i] += math.sin(time.time() + i) * 0.05
+
+# --- FASTAPI WEB INTERFACE ---
+app = FastAPI(title="Kryptic-Agent Telemetry Dashboard")
+engine = KrypticActiveInferenceEngine()
+
+# Safe global initialization wrapper hook for ROS2 runtime boundaries
+ros2_node: Optional[Any] = None
+if HAS_ROS2:
+    if not rclpy.ok():
+        rclpy.init()
+    ros2_node = KrypticROS2Driver(engine)
+else:
+    ros2_node = KrypticROS2Driver(engine)
+
+connected_websockets: List[WebSocket] = []
+
+@app.websocket("/ws/telemetry")
+async def telemetry_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    connected_websockets.append(websocket)
+    try:
+        while True:
+            await asyncio.sleep(1.0)  # Keep connection alive
+    except WebSocketDisconnect:
+        connected_websockets.remove(websocket)
+
+async def broadcast_telemetry(data: Dict[str, Any]):
+    for ws in connected_websockets:
+        try:
+            await ws.send_json(data)
+        except Exception:
+            continue
+
+# --- 1000Hz DETERMINISTIC RUNTIME EXECUTION COROUTINE ---
+async def active_inference_loop():
+    target_dt = 0.001  # Deterministic 1000Hz cadence (1ms)
+    logger.info("Starting active inference engine loop at 1000Hz clock speed.")
+    
+    while True:
+        t_start = time.perf_counter()
+        
+        # 1. Process ROS2 message queues safely if active
+        if HAS_ROS2 and rclpy.ok():
+            rclpy.spin_once(ros2_node, timeout_sec=0.0)
+            
+        # 2. Update Free Energy Matrix calculations
+        vfe_metric = engine.compute_variational_free_energy()
+        
+        # 3. Publish sub-millisecond multi-axis corrections
+        ros2_node.publish_actuation()
+        
+        # 4. Stream internal state logs asynchronously to database and web dashboard
+        drift_calculation = sum([abs(m) for m in engine.mu])
+        engine.db.log_metrics(vfe_metric, drift_calculation)
+        
+        if len(connected_websockets) > 0:
+            payload = {
+                "vfe": vfe_metric,
+                "mu": engine.mu,
+                "drift": drift_calculation,
+                "timestamp": time.time()
+            }
+            asyncio.create_task(broadcast_telemetry(payload))
+            
+        t_end = time.perf_counter()
+        elapsed = t_end - t_start
+        sleep_time = target_dt - elapsed
+        
+        if sleep_time > 0:
+            await asyncio.sleep(sleep_time)
+        else:
+            # Yield minimal execution slicing when hardware frames experience slight drift
+            await asyncio.sleep(0)
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(active_inference_loop())
+
+@app.on_event("shutdown")
+def shutdown_event():
+    engine.db.close()
+    if HAS_ROS2 and rclpy.ok():
+        rclpy.shutdown()
+    logger.info("Kryptic-Agent Engine successfully halted.")
 
 if __name__ == "__main__":
-    logger.info("Initializing integrated Kryptic-Agent Node...")
-    generate_grant_strategy_hook()
+    # Runs the web management node on default local cluster configuration ports
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="warning")
     
-    agent = KrypticAgentCore()
-    
-    # Run absolute integrity verification tests prior to loop execution
-    if not OperationalVerificationSuite.run_diagnostics(agent.engine):
-        logger.critical("System diagnostics failed. Aborting runtime execution.")
-        sys.exit(1)
-        
-    logger.info("Starting production processing cycle. Press Ctrl+C to terminate.")
-    try:
-        # Run a brief simulation sequence demonstrating structural functional compliance
-        for cycle in range(1, 6):
-            logger.info(f"--- Execution Cycle {cycle} ---")
-            # Injecting decaying mock deviations to demonstrate predictive convergence
-            mock_deviation = [0.8 / cycle, -0.4 / cycle, 0.2 / cycle, 0.1 / cycle]
-            state_data = agent.step(simulated_positions=mock_deviation)
-            logger.info(f"Free Energy Metric: {state_data.variational_free_energy:.6f}")
-            logger.info(f"Aggregated Residual Error: {state_data.prediction_error:.6f}")
-            time.sleep(0.5)
-    except KeyboardInterrupt:
-        logger.info("Termination signal caught by runtime monitor.")
-    finally:
-        agent.shutdown()
-        
