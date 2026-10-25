@@ -1,5 +1,8 @@
 name: Master Workflow
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
