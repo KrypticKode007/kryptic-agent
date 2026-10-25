@@ -1,0 +1,54 @@
+{
+    "cluster_meta": {
+        "network_id": "kryptic-swarm-mesh-alpha",
+        "topology": "distributed-consensus-grid",
+        "last_synchronized": "2026-10-25T00:08:00Z",
+        "orchestrator_node": "node-01-ground-master"
+    },
+    "network_protocols": {
+        "transport_layer": "ROS2-DDS-Cyclone",
+        "telemetry_protocol": "FastAPI-WebSockets",
+        "heartbeat_interval_ms": 100,
+        "max_latency_tolerance_ms": 15
+    },
+    "node_registry": [
+        {
+            "node_id": "node-01-ground-master",
+            "role": "active-inference-orchestrator",
+            "ip_address": "127.0.0.1",
+            "ros2_domain_id": 42,
+            "fastapi_port": 8000,
+            "allocated_cores":,
+            "realtime_priority": 99,
+            "sensory_channels": ["/hardware/motor_commands", "/joint_states"]
+        },
+        {
+            "node_id": "node-02-edge-tracking-alpha",
+            "role": "kalman-covariance-isolator",
+            "ip_address": "127.0.0.1",
+            "ros2_domain_id": 42,
+            "fastapi_port": 8001,
+            "allocated_cores":,
+            "realtime_priority": 85,
+            "sensory_channels": ["/sensor/dji_telemetry", "/sensor/drift_matrices"]
+        },
+        {
+            "node_id": "node-03-edge-tracking-beta",
+            "role": "kinematic-failsafe-mediator",
+            "ip_address": "127.0.0.1",
+            "ros2_domain_id": 42,
+            "fastapi_port": 8002,
+            "allocated_cores":,
+            "realtime_priority": 90,
+            "sensory_channels": ["/hardware/kill_switch", "/thermal/cooling_bounds"]
+        }
+    ],
+    "consensus_parameters": {
+        "min_active_nodes_for_quorum": 2,
+        "free_energy_divergence_threshold": 12.5,
+        "automatic_failover_sequence": [
+            "node-02-edge-tracking-alpha",
+            "node-03-edge-tracking-beta"
+        ]
+    }
+      }
