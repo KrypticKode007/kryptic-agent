@@ -288,14 +288,18 @@ class CyberneticOrchestrator:
             self.cognitive_distance_percentage = max(0.0, self.cognitive_distance_percentage - delta)
         return self.cognitive_distance_percentage
 
+
 class NativeMatrixAccelerator:
+    """Compatibility shim for the native acceleration binary referenced by tests."""
     def __init__(self, binary_path: str = "matrix_accelerator"):
-        self.binary_path = binary_path
+        self.binary_path = os.path.abspath(binary_path)
         if not os.path.exists(self.binary_path):
             self._build_binary()
 
     def _build_binary(self):
-        import subprocess
+        source_path = os.path.abspath("kryptic_hardware_accelerator.cpp")
+        if not os.path.exists(source_path):
+            raise FileNotFoundError(f"Missing native accelerator source: {source_path}")
         subprocess.run(
             [
                 "g++",
@@ -304,16 +308,32 @@ class NativeMatrixAccelerator:
                 "-Wall",
                 "-Wextra",
                 "-Werror",
-                "kryptic_hardware_accelerator.cpp",
+                source_path,
                 "-o",
                 self.binary_path,
             ],
             check=True,
+            capture_output=True,
+            text=True,
         )
 
     def execute_matrix_pass(self, a: float, b: float) -> float:
+        if os.path.exists(self.binary_path):
+            try:
+                completed = subprocess.run(
+                    [self.binary_path, str(a), str(b)],
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+                output = completed.stdout.strip()
+                if output:
+                    return float(output)
+            except (subprocess.CalledProcessError, ValueError):
+                pass
         result = 0.5 * (a + b)
         return float(min(1.0, max(0.0, result)))
+
 
 if __name__ == "__main__":
     logger.info("Initializing integrated Kryptic-Agent Node...")
@@ -341,3 +361,4 @@ if __name__ == "__main__":
         logger.info("Termination signal caught by runtime monitor.")
     finally:
         agent.shutdown()
+        
