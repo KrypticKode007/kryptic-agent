@@ -1,5 +1,8 @@
 name: Kryptic-Agent CI Engine
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ main, dev-hardware-integration, commercial ]

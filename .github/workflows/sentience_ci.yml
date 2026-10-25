@@ -5,6 +5,9 @@
 
 name: "Embodied Cybernetic Sentience CI Audit Suite"
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ "main", "development" ]
