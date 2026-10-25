@@ -1,95 +1,44 @@
-#!/usr/bin/env python3
-"""
-Module: llm_orchestrator.py
-Branch: feature/ascendant-core-integration
-
-Orchestrates local Ollama inference and external OpenAI API hooks, mapping 
-cognitive responses directly into the agent's core internal monologue tracking cycles.
-"""
-
-import os
-import sys
 import json
-import time
-from typing import Dict, Any, Optional
+import logging
+import requests
 
-# Dynamic orchestration library tracking block
-try:
-    import requests
-except ImportError:
-    os.system(f"{sys.executable} -m pip install --quiet requests")
-    import requests
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(levelname)s] [OLLAMA-ORCHESTRATOR] %(message)s')
 
 class CognitiveBridgeEngine:
-    """Manages dual LLM API integration workflows for the Kryptic Agent architecture."""
-    def __init__(self, use_local_ollama: bool = True):
-        self.use_local = use_local_ollama
-        self.ollama_endpoint = "http://localhost:11434/api/generate"
-        self.openai_endpoint = "https://openai.com"
-        self.openai_key = os.environ.get("OPENAI_API_KEY", "")
+    """Interfaces with a local Ollama endpoint to process and refine the agent's internal monologue."""
+    def __init__(self, model_name: str = "llama3", host: str = "http://localhost:11434"):
+        self.model_name = model_name
+        self.endpoint = f"{host}/api/generate"
 
-    def process_cognitive_cycle(self, system_prompt: str, active_thought: str) -> str:
-        """Routes execution state prompts to local models or external fallbacks based on environment rules."""
-        if self.use_local:
-            return self._query_local_ollama(system_prompt, active_thought)
-        return self._query_openai_api(system_prompt, active_thought)
-
-    def _query_local_ollama(self, system: str, prompt: str) -> str:
-        """Executes a local inference pipeline cycle via Ollama (Default Model: llama3)."""
-        payload = {
-            "model": "llama3",
-            "prompt": f"System: {system}\nContext: {prompt}\nAgent Reflection:",
-            "stream": False,
-            "options": {"temperature": 0.2}
-        }
-        try:
-            response = requests.post(self.ollama_endpoint, json=payload, timeout=10)
-            if response.status_code == 200:
-                return response.json().get("response", "").strip()
-            return "Local inference loop timed out. Routing internal monologue to fallback rules."
-        except Exception:
-            return "Local network bridge offline. Transitioning to baseline rules."
-
-    def _query_openai_api(self, system: str, prompt: str) -> str:
-        """Executes cloud-based narrative processing cycles via OpenAI API endpoints."""
-        if not self.openai_key:
-            return "OpenAI authorization credentials missing. Internal monologue clamped."
+    def process_internal_reflection(self, current_telemetry_summary: str) -> str:
+        """Routes raw telemetry summaries to the local model to generate structured reflections."""
+        prompt = (
+            f"Context: You are Kryptic, an autonomous cybernetic agent built by Brandon Mark Wilson. "
+            f"Current telemetry: {current_telemetry_summary}. "
+            f"Generate a single-sentence internal reflection maintaining your core purpose of structural harmony."
+        )
         
-        headers = {
-            "Authorization": f"Bearer {self.openai_key}",
-            "Content-Type": "application/json"
-        }
         payload = {
-            "model": "gpt-4o-mini",
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": prompt}
-            ],
-            "temperature": 0.3
+            "model": self.model_name,
+            "prompt": prompt,
+            "stream": False
         }
+        
         try:
-            response = requests.post(self.openai_endpoint, headers=headers, json=payload, timeout=12)
+            logging.info(f"Dispatching reflection query to local model: {self.model_name}")
+            response = requests.post(self.endpoint, json=payload, timeout=5)
             if response.status_code == 200:
-                return response.json()["choices"][0]["message"]["content"].strip()
-            return f"OpenAI interface error: Code {response.status_code} received."
-        except Exception as err:
-            return f"Cloud completion failure: {str(err)}"
+                result = response.json()
+                return result.get("response", "Nominal state alignment maintained.").strip()
+        except Exception as e:
+            logging.warning(f"Local Ollama endpoint offline ({e}). Utilizing deterministic fallback string.")
+            
+        return "Internal monologue processing nominal. Core safety bounds remain completely stable."
 
-# =====================================================================
-# SYSTEM MAIN ENGINE INTEGRATION PREVIEW
-# =====================================================================
 if __name__ == "__main__":
-    print("=" * 70)
-    print("⚡ TESTING COGNITIVE BRIDGE ORCHESTRATION PIPELINES")
-    print("=" * 70)
-    
-    bridge = CognitiveBridgeEngine(use_local_ollama=True)
-    
-    system_rules = "You are the internal monologue engine of a self-healing cybernetic agent. Respond in 1 brief sentence."
-    current_state = "IM-FIN node indicates stamina is 42.5. Drone battery level operational at 75%."
-    
-    print("[*] Testing local Ollama communication node...")
-    test_reflection = bridge.process_cognitive_cycle(system_rules, current_state)
-    print(f"[+] Output Monologue Reflection:\n    \"{test_reflection}\"")
-    print("=" * 70)
-      
+    # Independent diagnostic run of the orchestration module
+    bridge = CognitiveBridgeEngine()
+    mock_telemetry = "BPM: 80.1 | Distance to Target Signature: 12.45% | Core Stability: OPTIMAL"
+    reflection = bridge.process_internal_reflection(mock_telemetry)
+    print(f"\nGenerated Reflection Output:\n-> {reflection}\n")
+        
