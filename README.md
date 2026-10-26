@@ -9,6 +9,8 @@ An enterprise-grade, high-velocity active inference software engineering framewo
 *   **Distributed Multi-Node Grid:** Multi-process orchestration mapping dedicated roles across local clusters via optimized Eclipse Cyclone DDS transport boundaries.
 *   **Enterprise Evaluation Ecosystem:** Automated continuous regression suites via `pytest` and robust multi-stage Docker compilation workflows matching industrial security compliance layers.
 
+[![Covered by Argos Visual Testing](https://argos-ci.com/badge-large.svg)](https://app.argos-ci.com/kryptic-kode007/kryptic-agent/reference)
+
 ## 📂 Structural Codebase Branch Layout
 
 1. `core/infrastructure` — Central mathematical VFE loops, storage rotation algorithms, and telemetry ledgers.
