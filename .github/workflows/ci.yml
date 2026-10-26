@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PYTHONPATH: ${{ github.workspace }}${{ env.PYTHONPATH != '' && format(':{0}', env.PYTHONPATH) || '' }}
+      PYTHONPATH: ${{ github.workspace }}
 
     steps:
       - name: Checkout Repository Code
@@ -56,9 +56,5 @@ jobs:
 
       - name: Execute Cybernetic Validation Testing Matrix
         run: |
-fix-ci-import-path
           export PYTHONPATH="$GITHUB_WORKSPACE${PYTHONPATH:+:$PYTHONPATH}"
-          
-          export PYTHONPATH="${PYTHONPATH}:$PWD"
-main
-          pytest tests -q
+          python -m pytest tests -q
