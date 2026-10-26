@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kryptic-agent"
+version = "0.1.0"
+description = "Kryptic-Agent CI validation package"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+py-modules = [
+  "main",
+  "ego_boundary_calculator",
+  "encrypt_weights",
+  "kryptic_integration_core",
+]
