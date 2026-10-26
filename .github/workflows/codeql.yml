@@ -18,8 +18,11 @@ jobs:
   build-and-test:
     name: Build and Test
     runs-on: ubuntu-latest
+fix-ci-import-path
     env:
       PYTHONPATH: ${{ github.workspace }}
+
+ main
 
     steps:
       - name: Checkout repository
