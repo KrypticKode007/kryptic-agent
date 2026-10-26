@@ -181,13 +181,28 @@ engine = KrypticActiveInferenceEngine()
 # Safe global initialization wrapper hook for ROS2 runtime boundaries
 ros2_node: Optional[Any] = None
 if HAS_ROS2:
-    if not rclpy.ok():
-        rclpy.init()
-    ros2_node = KrypticROS2Driver(engine)
+    try:
+        if not rclpy.ok():
+            rclpy.init()
+    except Exception:
+        HAS_ROS2 = False
+    if HAS_ROS2:
+        ros2_node = KrypticROS2Driver(engine)
 else:
     ros2_node = KrypticROS2Driver(engine)
 
 connected_websockets: List[WebSocket] = []
+
+
+def _app_event(event_name: str):
+    """Compatibility wrapper for FastAPI versions that do not expose on_event."""
+    if hasattr(app, "on_event"):
+        return app.on_event(event_name)
+
+    def decorator(func):
+        return func
+    return decorator
+
 
 @app.websocket("/ws/telemetry")
 async def telemetry_endpoint(websocket: WebSocket):
@@ -198,6 +213,7 @@ async def telemetry_endpoint(websocket: WebSocket):
             await asyncio.sleep(1.0)  # Keep connection alive
     except WebSocketDisconnect:
         connected_websockets.remove(websocket)
+
 
 async def broadcast_telemetry(data: Dict[str, Any]):
     for ws in connected_websockets:
@@ -215,14 +231,19 @@ async def active_inference_loop():
         t_start = time.perf_counter()
 
         # 1. Process ROS2 message queues safely if active
-        if HAS_ROS2 and rclpy.ok():
-            rclpy.spin_once(ros2_node, timeout_sec=0.0)
+        if HAS_ROS2 and ros2_node is not None:
+            try:
+                if hasattr(rclpy, "ok") and rclpy.ok():
+                    rclpy.spin_once(ros2_node, timeout_sec=0.0)
+            except Exception:
+                pass
 
         # 2. Update Free Energy Matrix calculations
         vfe_metric = engine.compute_variational_free_energy()
 
         # 3. Publish sub-millisecond multi-axis corrections
-        ros2_node.publish_actuation()
+        if ros2_node is not None and hasattr(ros2_node, "publish_actuation"):
+            ros2_node.publish_actuation()
 
         # 4. Stream internal state logs asynchronously to database and web dashboard
         drift_calculation = sum([abs(m) for m in engine.mu])
@@ -247,16 +268,19 @@ async def active_inference_loop():
             # Yield minimal execution slicing when hardware frames experience slight drift
             await asyncio.sleep(0)
 
-@app.on_event("startup")
+
+@_app_event("startup")
 async def startup_event():
     asyncio.create_task(active_inference_loop())
 
-@app.on_event("shutdown")
+
+@_app_event("shutdown")
 def shutdown_event():
     engine.db.close()
-    if HAS_ROS2 and rclpy.ok():
+    if HAS_ROS2 and ros2_node is not None and hasattr(rclpy, "ok") and rclpy.ok():
         rclpy.shutdown()
     logger.info("Kryptic-Agent Engine successfully halted.")
+
 
 if __name__ == "__main__":
     # Runs the web management node on default local cluster configuration ports
