@@ -1,13 +1,13 @@
 {
   "name": "kryptic-agent",
   "private": true,
-  "type": "module",
+  "description": "Python/C++ runtime for Kryptic-Agent robotics and active-inference orchestration.",
+  "version": "0.1.0",
+  "python": ">=3.10",
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest"
-  },
-  "devDependencies": {
-    "playwright": "^1.49.1",
-    "vitest": "^2.1.8"
+    "build:python": "python -m compileall .",
+    "test:python": "pytest tests -q",
+    "build:cpp": "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --parallel",
+    "check": "python -m compileall . && pytest tests -q && cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --parallel"
   }
 }
