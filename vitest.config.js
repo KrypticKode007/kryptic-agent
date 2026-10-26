@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [
     argosVitestPlugin({
       // Upload screenshots to Argos when CI is enabled
-      uploadToArgos: !!process.env.CI, CI:true
+      uploadToArgos: !!process.env.CI,
     }),
   ],
   test: {
