@@ -56,5 +56,9 @@ jobs:
 
       - name: Execute Cybernetic Validation Testing Matrix
         run: |
+fix-ci-import-path
           export PYTHONPATH="$GITHUB_WORKSPACE${PYTHONPATH:+:$PYTHONPATH}"
+          
+          export PYTHONPATH="${PYTHONPATH}:$PWD"
+main
           pytest tests -q

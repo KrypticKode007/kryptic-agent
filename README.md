@@ -1,45 +1,67 @@
-# Kryptic-Agent Autonomous Ground Station Core
+# Kryptic-Agent
 
-An enterprise-grade, high-velocity active inference software engineering framework designed for deep-tech robotic systems. Engineered by **kryptickode007**, this repository implements sub-millisecond sensory-motor corrections natively on bare-metal physical hardware interfaces.
+Kryptic-Agent is a Python/C++ robotics and active-inference runtime with a ROS 2-compatible interface, FastAPI telemetry dashboard, and CMake C++ latency harness.
 
-## 🚀 Key Architectural Pillars
+## Repository status
 
-*   **Active Inference Engine:** Direct real-time minimization of Variational Free Energy matrices at a deterministic **1000Hz clock cadence**.
-*   **Built-in ROS 2 Drivers:** Native `rclpy` joint encoder state bindings (`KrypticROS2Driver`) eliminating heavy abstract middleware simulation delays.
-*   **Distributed Multi-Node Grid:** Multi-process orchestration mapping dedicated roles across local clusters via optimized Eclipse Cyclone DDS transport boundaries.
-*   **Enterprise Evaluation Ecosystem:** Automated continuous regression suites via `pytest` and robust multi-stage Docker compilation workflows matching industrial security compliance layers.
+This repository is organized as a Python-first runtime with a C++ validation target. It is intentionally rooted at the repository root so imports and local execution work without installation packaging churn.
 
-## 📂 Structural Codebase Branch Layout
+## Prerequisites
 
-1. `core/infrastructure` — Central mathematical VFE loops, storage rotation algorithms, and telemetry ledgers.
-2. `feature/ros2-drivers` — Native robotic multi-axis actuator interfaces and hardware node bindings.
-3. `feature/telemetry-dashboard` — Asynchronous FastAPI WebSockets metrics transmission API tier.
-4. `feature/validation-testing` — High-velocity simulation testbeds and automated hardware drift edge checks.
-5. `feature/hardware-boot` — Real-time POSIX scheduling configurations and systemd service profiles.
-6. `feature/docker-deployment` — Cross-compilation multi-stage execution isolation layers.
-7. `feature/cpp-latency-tracker` — High-speed serialization modules linked directly to low-level `-lrt` wrappers.
-8. `commercial/strategy-funding` — Strategic technical abstracts mapping structural SBIR funding matrix phases.
-9. `dev-hardware-integration` — Local testing benchmarks and physical sensor calibration constants.
-10. `release/stable-monolith` — Final production deployment matrix packaging the entire workspace infrastructure.
+- Python 3.10+
+- CMake 3.16+
+- GCC/Clang
+- `pip`
 
-## ⚡ Direct Lab Deployment Checklist
-
-To automatically unpack the comprehensive monolithic architecture and initialize the multi-node testing grid across local server interfaces, execute the following shell chain:
+## Quick start
 
 ```bash
-# 1. Extract and deploy the entire 10-branch directory ecosystem instantly
-python3 master_kryptic_monolith.py
-
-# 2. Source the real-time sub-millisecond communication environment parameters
-export CYCLONE_DDS_URI=\$(pwd)/config/cyclone_dds_config.xml
-
-# 3. Boot up the parallel multi-node background process framework driver
-python3 multi_node_launcher.py
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
-## 🛠️ Testing Matrix Verification
-Run automated testing pipelines to check mathematical boundaries under intensive transient vibration stressors:
+## Validation and build
+
+From the repository root:
+
 ```bash
-pytest tests/test_kryptic_core.py -v
-python3 test_high_velocity_harness.py
+python -m compileall .
+pytest tests -q
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
 ```
+
+## Runtime entrypoints
+
+Python runtime:
+
+```bash
+python main.py
+```
+
+If you want to use the Cyclone DDS configuration:
+
+```bash
+export CYCLONE_DDS_URI="$PWD/cyclone_dds_config.xml"
+python main.py
+```
+
+The repository also contains the legacy design notes in `master_kryptic_monolith.md`; those are documentation artifacts and are not the active executable entrypoint.
+
+## Project layout
+
+- `main.py` — FastAPI runtime and orchestration entrypoint
+- `kryptic_integration_core.py` — homeostatic and safety integration pipeline
+- `ego_boundary_calculator.py` — boundary classification calculator
+- `encrypt_weights.py` — AES-GCM weight encryption wrapper
+- `CMakeLists.txt` — C++ build configuration
+- `test_hardware_latency.cpp` — C++ latency verification target
+- `tests/` — Python test suite
+
+## Notes
+
+- The project intentionally does not use a Node/Vitest toolchain.
+- The repo root is the runtime root; avoid moving the code into a nested package before the build is finalized.
+- Local database artifacts (for example `tracking_profiles.db`, `kryptic_history.db`) remain ignored and should not be committed.
