@@ -8,7 +8,16 @@ version = "0.1.0"
 description = "Kryptic-Agent CI validation package"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+  "fastapi==0.115.0",
+  "uvicorn==0.32.0",
+  "requests>=2.33.0",
+  "cryptography>=42.0.0",
+  "pytest>=9.0.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.setuptools]
 py-modules = [
